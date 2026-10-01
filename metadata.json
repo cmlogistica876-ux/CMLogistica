@@ -1,0 +1,6 @@
+{
+  "name": "RutaTrack",
+  "description": "Plataforma logística de última milla para rastreo de vehículos, gestión de entregas y control de conductores.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

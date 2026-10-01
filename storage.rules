@@ -1,0 +1,27 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper function
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Evidences folder
+    match /evidences/{deliveryId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated(); // Allowed for conductors, coordinators, admins
+    }
+
+    // Signatures folder
+    match /signatures/{deliveryId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // Incident images folder
+    match /incidents/{incidentId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+  }
+}

@@ -1,0 +1,260 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Usuarios con acceso al sistema y roles operativos.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "ID de usuario único en Auth o Firestore" },
+        "displayName": { "type": "string", "description": "Nombre y apellido del usuario" },
+        "email": { "type": "string", "format": "email", "description": "Correo electrónico corporativo o personal" },
+        "phone": { "type": "string", "description": "Número de teléfono de contacto" },
+        "role": { "type": "string", "description": "Rol del usuario en el sistema" },
+        "status": { "type": "string", "enum": ["Activo", "Inactivo"], "description": "Estado de la cuenta" },
+        "clientId": { "type": "string", "description": "ID del cliente asociado si aplica" },
+        "driverId": { "type": "string", "description": "ID del conductor asociado si aplica" },
+        "username": { "type": "string", "description": "Nombre de usuario único para login" },
+        "mustChangePassword": { "type": "boolean", "description": "Indicador si debe cambiar contraseña" },
+        "createdAt": { "type": "string", "description": "Fecha y hora de creación ISO 8601" },
+        "updatedAt": { "type": "string", "description": "Fecha y hora de última actualización ISO 8601" },
+        "lastLoginAt": { "type": "string", "description": "Fecha del último inicio de sesión" }
+      },
+      "required": ["uid", "displayName", "email", "role", "status", "createdAt", "updatedAt"]
+    },
+    "CustomRole": {
+      "title": "CustomRole",
+      "description": "Perfiles y permisos configurables por módulo.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Identificador del rol" },
+        "name": { "type": "string", "description": "Nombre visible del rol" },
+        "description": { "type": "string", "description": "Descripción de responsabilidades del rol" },
+        "permissions": { "type": "array", "description": "Lista de permisos por módulo" },
+        "isSystem": { "type": "boolean", "description": "Si es un rol predeterminado del sistema" },
+        "createdAt": { "type": "string", "description": "Fecha de creación" },
+        "updatedAt": { "type": "string", "description": "Fecha de actualización" }
+      },
+      "required": ["id", "name", "permissions", "createdAt", "updatedAt"]
+    },
+    "Driver": {
+      "title": "Driver",
+      "description": "Ficha y registro de conductores de la flota.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Identificador del conductor" },
+        "userId": { "type": "string", "description": "ID de usuario vinculado" },
+        "name": { "type": "string", "description": "Nombre completo" },
+        "document": { "type": "string", "description": "Cédula o documento de identidad" },
+        "phone": { "type": "string", "description": "Teléfono de contacto móvil" },
+        "email": { "type": "string", "format": "email", "description": "Correo electrónico" },
+        "licenseNumber": { "type": "string", "description": "Número de licencia de conducción" },
+        "status": { "type": "string", "enum": ["Disponible", "En Ruta", "Inactivo", "Suspendido"], "description": "Estado operativo del conductor" },
+        "assignedVehicleId": { "type": "string", "description": "ID del vehículo asignado" },
+        "createdAt": { "type": "string", "description": "Fecha de alta" },
+        "updatedAt": { "type": "string", "description": "Fecha de actualización" }
+      },
+      "required": ["id", "name", "document", "phone", "email", "licenseNumber", "status", "createdAt", "updatedAt"]
+    },
+    "Vehicle": {
+      "title": "Vehicle",
+      "description": "Ficha de vehículos y estado mecánico/operativo.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Identificador único del vehículo" },
+        "plate": { "type": "string", "description": "Placa del vehículo" },
+        "type": { "type": "string", "description": "Tipo de carrocería o vehículo" },
+        "brand": { "type": "string", "description": "Marca del vehículo" },
+        "model": { "type": "string", "description": "Modelo o año" },
+        "capacity": { "type": "number", "description": "Capacidad máxima en kilogramos o volumen" },
+        "status": { "type": "string", "enum": ["Disponible", "En Ruta", "Mantenimiento", "Inactivo"], "description": "Estado actual" },
+        "assignedDriverId": { "type": "string", "description": "ID del conductor asignado" },
+        "currentLocation": { "type": "object", "description": "Última ubicación GPS registrada" },
+        "createdAt": { "type": "string", "description": "Fecha de creación" },
+        "updatedAt": { "type": "string", "description": "Fecha de modificación" }
+      },
+      "required": ["id", "plate", "type", "brand", "model", "capacity", "status", "createdAt", "updatedAt"]
+    },
+    "Client": {
+      "title": "Client",
+      "description": "Clientes o destinatarios de entregas.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "ID del cliente" },
+        "name": { "type": "string", "description": "Razón social o nombre" },
+        "taxId": { "type": "string", "description": "NIT o identificación tributaria" },
+        "address": { "type": "string", "description": "Dirección física de entrega" },
+        "city": { "type": "string", "description": "Ciudad de cobertura" },
+        "contactName": { "type": "string", "description": "Persona de contacto" },
+        "contactPhone": { "type": "string", "description": "Teléfono de contacto" },
+        "contactEmail": { "type": "string", "format": "email", "description": "Correo de contacto" },
+        "status": { "type": "string", "enum": ["Activo", "Inactivo"], "description": "Estado comercial" },
+        "createdAt": { "type": "string", "description": "Fecha de creación" },
+        "updatedAt": { "type": "string", "description": "Fecha de modificación" }
+      },
+      "required": ["id", "name", "taxId", "address", "city", "contactName", "contactPhone", "contactEmail", "status", "createdAt", "updatedAt"]
+    },
+    "Delivery": {
+      "title": "Delivery",
+      "description": "Órdenes de despacho y entregas individuales.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "ID único de la entrega" },
+        "code": { "type": "string", "description": "Código o número de remesa / guía" },
+        "clientId": { "type": "string", "description": "ID del cliente destinatario" },
+        "routeId": { "type": "string", "description": "ID de la ruta a la que pertenece" },
+        "address": { "type": "string", "description": "Dirección de destino" },
+        "city": { "type": "string", "description": "Ciudad de entrega" },
+        "location": { "type": "object", "description": "Coordenadas lat/lng de entrega" },
+        "scheduledDate": { "type": "string", "description": "Fecha programada YYYY-MM-DD" },
+        "timeWindowStart": { "type": "string", "description": "Ventana de entrega inicio HH:MM" },
+        "timeWindowEnd": { "type": "string", "description": "Ventana de entrega fin HH:MM" },
+        "status": { "type": "string", "enum": ["Pendiente", "Asignada", "En camino", "En sitio", "Entregada", "Fallida", "Reprogramada", "Cancelada"], "description": "Estado de la entrega" },
+        "priority": { "type": "string", "enum": ["Baja", "Media", "Alta"], "description": "Prioridad logística" },
+        "notes": { "type": "string", "description": "Observaciones especiales de entrega" },
+        "evidenceIds": { "type": "array", "description": "IDs de fotos o firmas de entrega" },
+        "failureReason": { "type": "string", "description": "Motivo de no entrega si aplica" },
+        "receivedByName": { "type": "string", "description": "Nombre de quien recibe" },
+        "receivedByDocument": { "type": "string", "description": "Documento de quien recibe" },
+        "deliveredAt": { "type": "string", "description": "Fecha y hora efectiva de entrega" },
+        "createdAt": { "type": "string", "description": "Fecha de creación" },
+        "updatedAt": { "type": "string", "description": "Fecha de actualización" }
+      },
+      "required": ["id", "code", "clientId", "address", "city", "location", "scheduledDate", "status", "priority", "createdAt", "updatedAt"]
+    },
+    "Route": {
+      "title": "Route",
+      "description": "Rutas logísticas y orden de entregas programadas.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "ID de la ruta" },
+        "code": { "type": "string", "description": "Código identificador de la ruta" },
+        "name": { "type": "string", "description": "Nombre descriptivo de la ruta" },
+        "driverId": { "type": "string", "description": "ID del conductor asignado" },
+        "vehicleId": { "type": "string", "description": "ID del vehículo asignado" },
+        "deliveryIds": { "type": "array", "description": "Lista ordenada de IDs de entregas" },
+        "status": { "type": "string", "enum": ["Planificada", "Asignada", "En curso", "Finalizada", "Cancelada"], "description": "Estado de la ruta" },
+        "plannedStartAt": { "type": "string", "description": "Hora estimada de salida" },
+        "actualStartAt": { "type": "string", "description": "Hora real de salida" },
+        "actualEndAt": { "type": "string", "description": "Hora real de cierre" },
+        "createdAt": { "type": "string", "description": "Fecha de creación" },
+        "updatedAt": { "type": "string", "description": "Fecha de actualización" }
+      },
+      "required": ["id", "code", "name", "deliveryIds", "status", "createdAt", "updatedAt"]
+    },
+    "Incident": {
+      "title": "Incident",
+      "description": "Novedades e incidentes reportados en ruta.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "ID de la novedad" },
+        "routeId": { "type": "string", "description": "ID de la ruta vinculada" },
+        "deliveryId": { "type": "string", "description": "ID del despacho afectado" },
+        "driverId": { "type": "string", "description": "ID del conductor que reporta" },
+        "vehicleId": { "type": "string", "description": "ID del vehículo" },
+        "type": { "type": "string", "description": "Categoría del incidente" },
+        "description": { "type": "string", "description": "Detalle del incidente" },
+        "status": { "type": "string", "enum": ["Abierto", "Solucionado"], "description": "Estado de la novedad" },
+        "location": { "type": "object", "description": "Coordenadas del incidente" },
+        "createdAt": { "type": "string", "description": "Fecha de reporte" },
+        "updatedAt": { "type": "string", "description": "Fecha de resolución o actualización" }
+      },
+      "required": ["id", "routeId", "driverId", "vehicleId", "type", "description", "status", "createdAt", "updatedAt"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Trazabilidad y auditoría de eventos de seguridad y negocio.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "ID de auditoría" },
+        "userId": { "type": "string", "description": "ID del usuario ejecutor" },
+        "userEmail": { "type": "string", "description": "Email del usuario ejecutor" },
+        "action": { "type": "string", "description": "Acción ejecutada" },
+        "entityType": { "type": "string", "description": "Módulo o tipo de entidad afectada" },
+        "entityId": { "type": "string", "description": "ID del registro afectado" },
+        "before": { "type": "string", "description": "Estado anterior JSON" },
+        "after": { "type": "string", "description": "Estado posterior JSON" },
+        "createdAt": { "type": "string", "description": "Momento exacto del evento" }
+      },
+      "required": ["id", "userId", "userEmail", "action", "entityType", "entityId", "createdAt"]
+    },
+    "SystemSettings": {
+      "title": "SystemSettings",
+      "description": "Configuración global de la plataforma.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "ID de configuración (general)" },
+        "companyName": { "type": "string", "description": "Nombre de la empresa" },
+        "defaultMapCenter": { "type": "object", "description": "Centro geográfico predeterminado del mapa" },
+        "locationUpdateIntervalSeconds": { "type": "number", "description": "Frecuencia de muestreo GPS en segundos" },
+        "allowedRoles": { "type": "array", "description": "Lista de roles permitidos" },
+        "updatedAt": { "type": "string", "description": "Fecha de actualización" }
+      },
+      "required": ["companyName", "defaultMapCenter", "locationUpdateIntervalSeconds", "updatedAt"]
+    },
+    "LocationUpdate": {
+      "title": "LocationUpdate",
+      "description": "Puntos de telemetría y geolocalización en tiempo real.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "ID del reporte GPS" },
+        "vehicleId": { "type": "string", "description": "ID del vehículo" },
+        "driverId": { "type": "string", "description": "ID del conductor" },
+        "routeId": { "type": "string", "description": "ID de la ruta" },
+        "lat": { "type": "number", "description": "Latitud" },
+        "lng": { "type": "number", "description": "Longitud" },
+        "heading": { "type": "number", "description": "Orientación en grados" },
+        "speed": { "type": "number", "description": "Velocidad km/h" },
+        "accuracy": { "type": "number", "description": "Precisión en metros" },
+        "batteryLevel": { "type": "number", "description": "Nivel de batería" },
+        "timestamp": { "type": "string", "description": "Estampa de tiempo del reporte" }
+      },
+      "required": ["id", "vehicleId", "driverId", "routeId", "lat", "lng", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Colección de usuarios del sistema RutaTrack"
+    },
+    "/roles/{roleId}": {
+      "schema": "CustomRole",
+      "description": "Colección de roles y permisos por módulo"
+    },
+    "/drivers/{driverId}": {
+      "schema": "Driver",
+      "description": "Colección de fichas de conductores"
+    },
+    "/vehicles/{vehicleId}": {
+      "schema": "Vehicle",
+      "description": "Colección de ficha técnica y operativa de vehículos"
+    },
+    "/clients/{clientId}": {
+      "schema": "Client",
+      "description": "Colección de clientes y puntos de entrega"
+    },
+    "/deliveries/{deliveryId}": {
+      "schema": "Delivery",
+      "description": "Colección de despachos y órdenes de entrega"
+    },
+    "/routes/{routeId}": {
+      "schema": "Route",
+      "description": "Colección de rutas programadas y despachos agrupados"
+    },
+    "/incidents/{incidentId}": {
+      "schema": "Incident",
+      "description": "Colección de novedades e incidentes en ruta"
+    },
+    "/audits/{auditId}": {
+      "schema": "AuditLog",
+      "description": "Colección de registros de auditoría y bitácora"
+    },
+    "/settings/{settingId}": {
+      "schema": "SystemSettings",
+      "description": "Configuración del sistema"
+    },
+    "/locations/{locationId}": {
+      "schema": "LocationUpdate",
+      "description": "Historial y puntos de telemetría GPS"
+    }
+  }
+}

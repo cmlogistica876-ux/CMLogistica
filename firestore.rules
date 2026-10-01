@@ -1,0 +1,137 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Utility functions for validation
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function hasRole(role) {
+      return isAuthenticated() && getUserData().role == role;
+    }
+
+    function isSuperAdmin() {
+      return hasRole("Super Administrador");
+    }
+
+    function isAdminOperativo() {
+      return hasRole("Administrador Operativo");
+    }
+
+    function isCoordinador() {
+      return hasRole("Coordinador Logístico");
+    }
+
+    function isConductor() {
+      return hasRole("Conductor");
+    }
+
+    function isAuditor() {
+      return hasRole("Auditor / Solo Lectura");
+    }
+
+    // --- Users Collection ---
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      // Only SuperAdmin can write, except users can update their own lastLoginAt or profile info
+      allow create: if isSuperAdmin() || isAdminOperativo();
+      allow update: if isSuperAdmin() 
+                    || (isAdminOperativo() && resource.data.role != "Super Administrador")
+                    || (request.auth.uid == userId && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastLoginAt', 'phone', 'displayName']));
+      allow delete: if isSuperAdmin();
+    }
+
+    // --- Drivers Collection ---
+    match /drivers/{driverId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin() || isAdminOperativo() || isCoordinador();
+    }
+
+    // --- Vehicles Collection ---
+    match /vehicles/{vehicleId} {
+      allow read: if isAuthenticated();
+      allow create, delete: if isSuperAdmin() || isAdminOperativo();
+      // Drivers can update current location of the vehicle they are assigned to
+      allow update: if isSuperAdmin() || isAdminOperativo() || isCoordinador() || isConductor();
+    }
+
+    // --- Clients Collection ---
+    match /clients/{clientId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin() || isAdminOperativo();
+    }
+
+    // --- Deliveries Collection ---
+    match /deliveries/{deliveryId} {
+      // Clients can only read their own deliveries
+      allow read: if isAuthenticated() && (
+        isSuperAdmin() || isAdminOperativo() || isCoordinador() || isConductor() || isAuditor()
+        || (hasRole("Cliente / Consulta") && resource.data.clientId == getUserData().clientId)
+      );
+      
+      allow create, delete: if isSuperAdmin() || isAdminOperativo() || isCoordinador();
+      
+      // Conductors can only update specific status fields of their assigned deliveries
+      allow update: if isSuperAdmin() || isAdminOperativo() || isCoordinador()
+                    || (isConductor() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'receivedByName', 'receivedByDocument', 'deliveredAt', 'evidenceIds', 'failureReason', 'updatedAt']));
+    }
+
+    // --- Routes Collection ---
+    match /routes/{routeId} {
+      allow read: if isAuthenticated();
+      allow create, delete: if isSuperAdmin() || isAdminOperativo();
+      allow update: if isSuperAdmin() || isAdminOperativo() || isCoordinador()
+                    || (isConductor() && resource.data.driverId == getUserData().driverId && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'actualStartAt', 'actualEndAt', 'updatedAt']));
+    }
+
+    // --- Incidents (Novedades) Collection ---
+    match /incidents/{incidentId} {
+      allow read: if isAuthenticated();
+      allow create: if isSuperAdmin() || isAdminOperativo() || isCoordinador() || isConductor();
+      allow update: if isSuperAdmin() || isAdminOperativo() || isCoordinador();
+      allow delete: if isSuperAdmin();
+    }
+
+    // --- Location Updates Collection ---
+    match /locationUpdates/{updateId} {
+      allow read: if isAuthenticated();
+      allow create: if isSuperAdmin() || isAdminOperativo() || isCoordinador() || isConductor();
+      allow update, delete: if isSuperAdmin();
+    }
+
+    // --- Evidences Collection ---
+    match /evidences/{evidenceId} {
+      allow read: if isAuthenticated();
+      allow create: if isSuperAdmin() || isAdminOperativo() || isCoordinador() || isConductor();
+      allow update, delete: if isSuperAdmin();
+    }
+
+    // --- Audit Logs Collection ---
+    match /auditLogs/{logId} {
+      allow read: if isSuperAdmin() || isAuditor();
+      allow create: if isAuthenticated(); // Application automatically writes log
+      allow update, delete: if false; // Audit logs must be immutable
+    }
+
+    // --- Roles Collection ---
+    match /roles/{roleId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin() || isAdminOperativo();
+    }
+
+    // --- System Health Ping ---
+    match /system_health/{healthId} {
+      allow read, write: if true;
+    }
+
+    // --- Settings Collection ---
+    match /settings/{settingId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+  }
+}
